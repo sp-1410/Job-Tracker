@@ -1,0 +1,18 @@
+meta {
+  name: Create Company
+  type: http
+  seq: 3
+}
+post {
+  url: http://localhost:8080/api/companies
+  body: json
+  auth: none
+}
+body:json {
+  {
+    "name": "Example Corp",
+    "website": "https://example.com",
+    "industry": "Technology",
+    "location": "Bangalore"
+  }
+}

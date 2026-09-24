@@ -1,0 +1,3 @@
+import { Injectable } from '@angular/core'; import { HttpClient } from '@angular/common/http'; import { Interview } from '../models/models';
+@Injectable({providedIn:'root'}) export class InterviewService { private api='http://localhost:8080/api/interviews'; constructor(private http:HttpClient){}
+getByApplication(id:number){return this.http.get<Interview[]>(`${this.api}/application/${id}`)} create(x:Interview){return this.http.post<Interview>(this.api,x)} update(id:number,x:Interview){return this.http.put<Interview>(`${this.api}/${id}`,x)} delete(id:number){return this.http.delete<void>(`${this.api}/${id}`)} }

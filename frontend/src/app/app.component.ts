@@ -1,0 +1,62 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ApplicationService } from './services/application.service';
+import { CompanyService } from './services/company.service';
+import { DashboardService } from './services/dashboard.service';
+import { JobService } from './services/job.service';
+import { AssessmentService } from './services/assessment.service';
+import { InterviewService } from './services/interview.service';
+import { ResumeService } from './services/resume.service';
+import { Application, ApplicationStatus, ApplicationStatusHistory, Company, DashboardSummary, Job, OnlineAssessment, Interview, Resume, OaResult } from './models/models';
+
+@Component({selector:'app-root',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./app.component.html',styleUrls:['./app.component.css']})
+export class AppComponent {
+  view:'dashboard'|'jobs'|'companies'|'applications'|'resumes'='dashboard'; loading=false;saving=false;error='';toast='';search='';
+  summary:DashboardSummary={totalJobs:0,totalApplications:0,upcomingInterviews:0,applicationsByStatus:{}};
+  jobs:Job[]=[];companies:Company[]=[];applications:Application[]=[];resumes:Resume[]=[];history:ApplicationStatusHistory[]=[];interviews:Interview[]=[];selectedApplication?:Application;selectedOa?:OnlineAssessment;
+  showJobForm=false;showCompanyForm=false;showApplicationForm=false;showDetails=false;showOaForm=false;showInterviewForm=false;showResumeForm=false;showHistory=false;
+  editingJobId?:number;editingCompanyId?:number;editingInterviewId?:number;editingResumeId?:number;
+  statuses:ApplicationStatus[]=['SAVED','APPLIED','OA','SCREENING','INTERVIEW','OFFER','REJECTED','WITHDRAWN']; oaResults:OaResult[]=['PENDING','PASSED','FAILED','NOT_KNOWN'];
+  jobForm:Job=this.emptyJob(); companyForm:Company=this.emptyCompany();
+  applicationForm:any={status:'SAVED',applicationDate:new Date().toISOString().slice(0,10),notes:'',jobId:undefined,resumeId:undefined};
+  oaForm:OnlineAssessment=this.emptyOa(); interviewForm:Interview=this.emptyInterview(); resumeForm:Resume=this.emptyResume();
+  constructor(private dashboardService:DashboardService,private jobService:JobService,private companyService:CompanyService,private applicationService:ApplicationService,private assessmentService:AssessmentService,private interviewService:InterviewService,private resumeService:ResumeService){this.refreshAll()}
+  setView(v:any){this.view=v;this.error=''; if(v==='dashboard')this.loadDashboard();if(v==='jobs')this.loadJobs();if(v==='companies')this.loadCompanies();if(v==='applications')this.loadApplications();if(v==='resumes')this.loadResumes()}
+  refreshAll(){this.loadDashboard();this.loadCompanies();this.loadJobs();this.loadApplications();this.loadResumes()}
+  loadDashboard(){this.dashboardService.getSummary().subscribe({next:x=>this.summary=x,error:e=>this.handleError(e)})} loadCompanies(){this.companyService.getAll().subscribe({next:x=>this.companies=x,error:e=>this.handleError(e)})}
+  loadJobs(){this.jobService.getAll(this.search).subscribe({next:x=>this.jobs=x,error:e=>this.handleError(e)})} loadApplications(){this.applicationService.getAll().subscribe({next:x=>this.applications=x,error:e=>this.handleError(e)})} loadResumes(){this.resumeService.getAll().subscribe({next:x=>this.resumes=x,error:e=>this.handleError(e)})}
+  openNewJob(){this.editingJobId=undefined;this.jobForm=this.emptyJob();this.showJobForm=true;this.error=''} editJob(j:Job){this.editingJobId=j.id;this.jobForm=this.clone(j);this.showJobForm=true;this.error=''}
+  saveJob(){if(!this.jobForm.title.trim()||!this.jobForm.company?.id){this.error='Job title and company are required.';return}this.saving=true;const r={...this.jobForm,company:{id:this.jobForm.company.id} as Company};const a=this.editingJobId?this.jobService.update(this.editingJobId,r):this.jobService.create(r);a.subscribe({next:()=>{this.closeModals();this.notify(this.editingJobId?'Job updated.':'Job created.');this.refreshAll()},error:e=>this.handleError(e),complete:()=>this.saving=false})}
+  deleteJob(j:Job){if(!j.id||!confirm(`Delete ${j.title}?`))return;this.jobService.delete(j.id).subscribe({next:()=>{this.notify('Job deleted.');this.refreshAll()},error:e=>this.handleError(e)})}
+  openNewCompany(){this.editingCompanyId=undefined;this.companyForm=this.emptyCompany();this.showCompanyForm=true;this.error=''} editCompany(c:Company){this.editingCompanyId=c.id;this.companyForm=this.clone(c);this.showCompanyForm=true;this.error=''}
+  saveCompany(){if(!this.companyForm.name.trim()){this.error='Company name is required.';return}this.saving=true;const a=this.editingCompanyId?this.companyService.update(this.editingCompanyId,this.companyForm):this.companyService.create(this.companyForm);a.subscribe({next:()=>{this.closeModals();this.notify(this.editingCompanyId?'Company updated.':'Company created.');this.refreshAll()},error:e=>this.handleError(e),complete:()=>this.saving=false})}
+  deleteCompany(c:Company){if(!c.id||!confirm(`Delete ${c.name}?`))return;this.companyService.delete(c.id).subscribe({next:()=>{this.notify('Company deleted.');this.refreshAll()},error:e=>this.handleError(e)})}
+  openNewApplication(){this.applicationForm={status:'SAVED',applicationDate:new Date().toISOString().slice(0,10),notes:'',jobId:undefined,resumeId:undefined};this.showApplicationForm=true;this.error=''}
+  saveApplication(){if(!this.applicationForm.jobId){this.error='Select a job.';return}const job=this.jobs.find(j=>j.id===Number(this.applicationForm.jobId));if(!job?.id){this.error='Selected job could not be found.';return}this.saving=true;const resume=this.resumes.find(r=>r.id===Number(this.applicationForm.resumeId));const request:any={job:{id:job.id},status:this.applicationForm.status,applicationDate:this.applicationForm.applicationDate,notes:this.applicationForm.notes,resume:resume?{id:resume.id}:null};this.applicationService.create(request).subscribe({next:()=>{this.closeModals();this.notify('Application created.');this.refreshAll()},error:e=>this.handleError(e),complete:()=>this.saving=false})}
+  updateStatus(a:Application,status:ApplicationStatus){if(!a.id)return;this.applicationService.updateStatus(a.id,status).subscribe({next:()=>{a.status=status;this.notify('Status updated.');this.loadDashboard()},error:e=>this.handleError(e)})}
+  deleteApplication(a:Application){if(!a.id||!confirm('Delete this application?'))return;this.applicationService.delete(a.id).subscribe({next:()=>{this.notify('Application deleted.');this.refreshAll()},error:e=>this.handleError(e)})}
+  openDetails(a:Application){this.selectedApplication=a;this.showDetails=true;this.loadOa();this.loadInterviews()}
+  loadOa(){if(!this.selectedApplication?.id)return;this.assessmentService.getByApplication(this.selectedApplication.id).subscribe({next:x=>this.selectedOa=x,error:e=>{if(e.status===404)this.selectedOa=undefined;else this.handleError(e)}})}
+  loadInterviews(){if(!this.selectedApplication?.id)return;this.interviewService.getByApplication(this.selectedApplication.id).subscribe({next:x=>this.interviews=x,error:e=>this.handleError(e)})}
+  openHistory(a:Application){if(!a.id)return;this.selectedApplication=a;this.applicationService.history(a.id).subscribe({next:x=>{this.history=x;this.showHistory=true},error:e=>this.handleError(e)})}
+  saveApplicationResume(){if(!this.selectedApplication?.id)return;const r=this.resumes.find(x=>x.id===Number((this.selectedApplication as any).editResumeId));const req:any={job:{id:this.selectedApplication.job.id},status:this.selectedApplication.status,applicationDate:this.selectedApplication.applicationDate,notes:this.selectedApplication.notes,resume:r?{id:r.id}:null};this.applicationService.update(this.selectedApplication.id,req).subscribe({next:x=>{this.selectedApplication=x;this.loadApplications();this.notify('Resume association updated.')},error:e=>this.handleError(e)})}
+  openNewOa(){if(!this.selectedApplication?.id)return;this.oaForm=this.emptyOa();this.oaForm.application={id:this.selectedApplication.id};this.showOaForm=true}
+  editOa(){if(!this.selectedOa)return;this.oaForm=this.clone(this.selectedOa);this.oaForm.application={id:this.selectedApplication?.id};this.showOaForm=true}
+  saveOa(){if(!this.selectedApplication?.id)return;this.saving=true;this.oaForm.application={id:this.selectedApplication.id};const a=this.oaForm.id?this.assessmentService.update(this.oaForm.id,this.oaForm):this.assessmentService.create(this.oaForm);a.subscribe({next:x=>{this.selectedOa=x;this.showOaForm=false;this.notify('OA saved.')},error:e=>this.handleError(e),complete:()=>this.saving=false})}
+  deleteOa(){if(!this.selectedOa?.id||!confirm('Delete OA details?'))return;this.assessmentService.delete(this.selectedOa.id).subscribe({next:()=>{this.selectedOa=undefined;this.notify('OA deleted.')},error:e=>this.handleError(e)})}
+  openNewInterview(){if(!this.selectedApplication?.id)return;this.editingInterviewId=undefined;this.interviewForm=this.emptyInterview();this.interviewForm.application={id:this.selectedApplication.id};this.showInterviewForm=true}
+  editInterview(i:Interview){this.editingInterviewId=i.id;this.interviewForm=this.clone(i);this.interviewForm.application={id:this.selectedApplication?.id};this.showInterviewForm=true}
+  saveInterview(){if(!this.selectedApplication?.id)return;this.saving=true;this.interviewForm.application={id:this.selectedApplication.id};const a=this.editingInterviewId?this.interviewService.update(this.editingInterviewId,this.interviewForm):this.interviewService.create(this.interviewForm);a.subscribe({next:()=>{this.showInterviewForm=false;this.loadInterviews();this.loadDashboard();this.notify('Interview saved.')},error:e=>this.handleError(e),complete:()=>this.saving=false})}
+  deleteInterview(i:Interview){if(!i.id||!confirm('Delete this interview?'))return;this.interviewService.delete(i.id).subscribe({next:()=>{this.loadInterviews();this.loadDashboard();this.notify('Interview deleted.')},error:e=>this.handleError(e)})}
+  openNewResume(){this.editingResumeId=undefined;this.resumeForm=this.emptyResume();this.showResumeForm=true} editResume(r:Resume){this.editingResumeId=r.id;this.resumeForm=this.clone(r);this.showResumeForm=true}
+  saveResume(){if(!this.resumeForm.name.trim()){this.error='Resume name is required.';return}this.saving=true;const a=this.editingResumeId?this.resumeService.update(this.editingResumeId,this.resumeForm):this.resumeService.create(this.resumeForm);a.subscribe({next:()=>{this.showResumeForm=false;this.loadResumes();this.notify(this.editingResumeId?'Resume updated.':'Resume created.')},error:e=>this.handleError(e),complete:()=>this.saving=false})}
+  deleteResume(r:Resume){if(!r.id||!confirm('Delete this resume version?'))return;this.resumeService.delete(r.id).subscribe({next:()=>{this.loadResumes();this.loadApplications();this.notify('Resume deleted.')},error:e=>this.handleError(e)})}
+  statusCount(s:ApplicationStatus){return this.summary.applicationsByStatus?.[s]||0} trackById(_:number,item:any){return item.id}
+  deadlineClass(d?:string){if(!d)return '';const diff=(new Date(d).getTime()-Date.now())/86400000;return diff<0?'overdue':diff<=3?'soon':''}
+  closeModals(){this.showJobForm=false;this.showCompanyForm=false;this.showApplicationForm=false;this.showHistory=false;this.showDetails=false;this.showOaForm=false;this.showInterviewForm=false;this.showResumeForm=false;this.saving=false}
+  private emptyJob():Job{return{title:'',company:{name:''},location:'',workMode:'',jobType:'',source:'',url:'',salaryRange:'',deadline:'',description:''}} private emptyCompany():Company{return{name:'',website:'',industry:'',location:'',notes:''}}
+  private emptyResume():Resume{return{name:'',versionLabel:'',targetRole:'',notes:''}} private emptyOa():OnlineAssessment{return{application:{id:undefined},platform:'',assessmentDate:new Date().toISOString().slice(0,10),durationMinutes:0,result:'PENDING',score:undefined,topics:'',notes:''}}
+  private emptyInterview():Interview{return{application:{id:undefined},roundName:'Technical L1',interviewType:'Technical',scheduledAt:'',status:'PENDING',topics:'',notes:'',feedback:'',preparationChecklist:''}}
+  private clone<T>(v:T):T{return JSON.parse(JSON.stringify(v))} private notify(m:string){this.toast=m;setTimeout(()=>this.toast='',2500)} private handleError(e:any){this.saving=false;this.error=e?.error?.error||e?.message||'Something went wrong. Check that the backend is running on port 8080.'}
+}

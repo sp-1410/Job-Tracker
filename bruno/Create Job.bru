@@ -1,0 +1,26 @@
+meta {
+  name: Create Job
+  type: http
+  seq: 4
+}
+post {
+  url: http://localhost:8080/api/jobs
+  body: json
+  auth: none
+}
+body:json {
+  {
+    "title": "Software Engineer Intern",
+    "location": "Bangalore",
+    "workMode": "Hybrid",
+    "jobType": "Internship",
+    "source": "LinkedIn",
+    "url": "https://example.com/job",
+    "description": "Backend engineering internship",
+    "salaryRange": "Competitive",
+    "deadline": "2026-09-15",
+    "company": {
+      "id": 1
+    }
+  }
+}
