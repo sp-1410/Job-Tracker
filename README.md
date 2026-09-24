@@ -1,93 +1,73 @@
-JobTrack – Job Application Tracker
+# JobTrack – Job Application Tracker
 
-A full-stack recruitment tracking application for organizing and monitoring the complete job application lifecycle.
+> A full-stack recruitment tracking application for organizing and monitoring the complete job application lifecycle.
 
-JobTrack centralizes jobs, companies, applications, online assessments, interviews, resumes, deadlines, and application history into one platform.
+JobTrack centralizes **jobs, companies, applications, online assessments, interviews, resumes, deadlines, and application history** into one platform.
 
-**Features**
+---
 
-**Job & Company Management**
+## Features
 
-Create and manage job opportunities and companies
+### Job & Company Management
 
-Track location, work mode, job type, source, salary range, and deadlines
+* Create and manage job opportunities and companies
+* Track location, work mode, job type, source, salary range, and deadlines
 
-**Application Tracking**
+### Application Tracking
 
-Track applications across recruitment stages
+* Track applications across recruitment stages
+* Maintain application dates and notes
+* Record complete application status history
 
-Maintain application dates and notes
+### Online Assessment Tracking
 
-Record complete application status history
+* Track assessment platform, date, duration, and score
+* Record results, topics tested, and notes
+* Support `PENDING`, `PASSED`, `FAILED`, and `NOT_KNOWN` outcomes
 
-**Online Assessment Tracking**
+### Interview Tracking
 
-Track assessment platform, date, duration, and score
+* Manage multiple interview rounds for each application
+* Record round type, date/time, topics, questions, and outcome
+* Store interview feedback and preparation notes
 
-Record results, topics tested, and notes
+### Resume Version Management
 
-Support PENDING, PASSED, FAILED, and NOT_KNOWN outcomes
+* Maintain multiple resume versions
+* Track target roles and resume-specific notes
+* Associate the resume used with an application
 
-**Interview Tracking**
+### Dashboard & Deadline Tracking
 
-Manage multiple interview rounds for each application
+* Monitor recruitment progress from a centralized dashboard
+* Track upcoming application deadlines
+* View application, assessment, and interview summaries
 
-Record round type, date/time, topics, questions, and outcome
+---
 
-Store interview feedback and preparation notes
+## Tech Stack
 
-**Resume Version Management**
+| Layer            | Technologies                                            |
+| ---------------- | ------------------------------------------------------- |
+| **Backend**      | Java 21, Spring Boot, Spring Data JPA, Hibernate, Maven |
+| **Frontend**     | Angular, TypeScript, HTML, CSS                          |
+| **Database**     | PostgreSQL, Supabase                                    |
+| **API Testing**  | Bruno                                                   |
+| **Architecture** | Layered REST API                                        |
 
-Maintain multiple resume versions
+---
 
-Track target roles and resume-specific notes
-
-Associate the resume used with an application
-
-**Dashboard & Deadline Tracking**
-
-Monitor recruitment progress from a centralized dashboard
-
-Track upcoming application deadlines
-
-View application, assessment, and interview summaries
-
-**Tech Stack**
-
-Layer
-
-Technologies
-
-Backend
-
-Java 21, Spring Boot, Spring Data JPA, Hibernate, Maven
-
-Frontend
-
-Angular, TypeScript, HTML, CSS
-
-Database
-
-PostgreSQL, Supabase
-
-API Testing
-
-Bruno
-
-Architecture
-
-Layered REST API
-
-**Architecture**
+## Architecture
 
 The backend follows a layered architecture:
 
-Controller → Service → Repository → JPA/Hibernate → PostgreSQL/Supabase
+**Controller → Service → Repository → JPA/Hibernate → PostgreSQL/Supabase**
 
 The Angular frontend communicates with the Spring Boot backend through REST APIs.
 
-Core Domain
+### Core Domain
 
+```text
 Job
  ├── Company
  └── Application
@@ -95,9 +75,13 @@ Job
       ├── Online Assessments
       ├── Interviews
       └── Resume
+```
 
-**Project Structure**
+---
 
+## Project Structure
+
+```text
 Job-Tracker/
 │
 ├── backend/
@@ -124,84 +108,91 @@ Job-Tracker/
 ├── .gitignore
 ├── package-lock.json
 └── README.md
+```
 
-**Getting Started**
+---
 
-Prerequisites:
+## Getting Started
 
-Java 21
+### Prerequisites
 
-Maven
+* Java 21
+* Maven
+* Node.js & npm
+* PostgreSQL or a Supabase project
 
-Node.js & npm
+### 1. Clone the Repository
 
-PostgreSQL or a Supabase project
-
-1. Clone the Repository
-
+```bash
 git clone https://github.com/sp-1410/Job-Tracker.git
 cd Job-Tracker
+```
 
-2. Configure the Database
+### 2. Configure the Database
 
 Set the following environment variables:
 
+```text
 DB_URL=your_database_url
 DB_USERNAME=your_database_username
 DB_PASSWORD=your_database_password
+```
 
-Note: Never commit real database credentials to the repository.
+> **Note:** Never commit real database credentials to the repository.
 
-3. Start the Backend
+### 3. Start the Backend
 
+```bash
 cd backend
 mvn spring-boot:run
+```
 
-Backend: http://localhost:8080
+Backend: `http://localhost:8080`
 
-4. Start the Frontend
+### 4. Start the Frontend
 
 Open a new terminal:
 
+```bash
 cd frontend
 npm install
 npm start
+```
 
-Frontend: http://localhost:4200
+Frontend: `http://localhost:4200`
 
-**API Modules**
+---
+
+## API Modules
 
 The backend exposes REST APIs for:
 
-/api/jobs
-
-/api/companies
-
-/api/applications
-
-/api/interviews
-
-/api/online-assessments
-
-/api/resumes
-
-/api/dashboard
+* `/api/jobs`
+* `/api/companies`
+* `/api/applications`
+* `/api/interviews`
+* `/api/online-assessments`
+* `/api/resumes`
+* `/api/dashboard`
 
 Application status history is available through the application API.
 
-**Current Development**
+---
 
-JobTrack is an ongoing project. Current development focuses on improving dashboard functionality and deadline tracking, with planned extensions for notifications and external job-site integration.
+## Current Development
 
-**Future Enhancements**
+JobTrack is an **ongoing project**. Current development focuses on improving dashboard functionality and deadline tracking, with planned extensions for notifications and external job-site integration.
 
-Job-site/API integration for importing opportunities
+---
 
-Automated deadline and interview notifications
+## Future Enhancements
 
-Advanced recruitment analytics
+* Job-site/API integration for importing opportunities
+* Automated deadline and interview notifications
+* Advanced recruitment analytics
+* Improved search and filtering
+* Authentication and user-specific job tracking
 
-Improved search and filtering
+---
 
-Authentication and user-specific job tracking
 
