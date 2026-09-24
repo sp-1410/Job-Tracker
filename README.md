@@ -1,86 +1,207 @@
-# JobTrack
+JobTrack – Job Application Tracker
 
-JobTrack is a full-stack job application and interview tracking platform.
+A full-stack recruitment tracking application for organizing and monitoring the complete job application lifecycle.
 
-## Stack
+JobTrack centralizes jobs, companies, applications, online assessments, interviews, resumes, deadlines, and application history into one platform.
 
-- Angular
-- Java 17
-- Spring Boot
-- Maven
-- Spring Data JPA / Hibernate
-- PostgreSQL (Supabase)
+**Features**
 
-## Architecture
+**Job & Company Management**
 
-Angular :4200 -> Spring Boot REST API :8080 -> Supabase PostgreSQL
+Create and manage job opportunities and companies
 
-## Prerequisites
+Track location, work mode, job type, source, salary range, and deadlines
 
-- JDK 17+
-- Maven 3.9+ (or IntelliJ Maven)
-- Node.js 18+
-- Angular CLI
+**Application Tracking**
 
-## 1. Configure Supabase
+Track applications across recruitment stages
 
-Create a Supabase project and obtain the PostgreSQL connection information.
+Maintain application dates and notes
 
-Set these environment variables before starting the backend:
+Record complete application status history
 
-DB_URL
-DB_USERNAME
-DB_PASSWORD
+**Online Assessment Tracking**
 
-Example Windows PowerShell:
+Track assessment platform, date, duration, and score
 
-$env:DB_URL="jdbc:postgresql://HOST:5432/postgres?sslmode=require"
-$env:DB_USERNAME="postgres"
-$env:DB_PASSWORD="YOUR_PASSWORD"
+Record results, topics tested, and notes
 
-Do not commit real credentials.
+Support PENDING, PASSED, FAILED, and NOT_KNOWN outcomes
 
-## 2. Start backend
+**Interview Tracking**
+
+Manage multiple interview rounds for each application
+
+Record round type, date/time, topics, questions, and outcome
+
+Store interview feedback and preparation notes
+
+**Resume Version Management**
+
+Maintain multiple resume versions
+
+Track target roles and resume-specific notes
+
+Associate the resume used with an application
+
+**Dashboard & Deadline Tracking**
+
+Monitor recruitment progress from a centralized dashboard
+
+Track upcoming application deadlines
+
+View application, assessment, and interview summaries
+
+**Tech Stack**
+
+Layer
+
+Technologies
+
+Backend
+
+Java 21, Spring Boot, Spring Data JPA, Hibernate, Maven
+
+Frontend
+
+Angular, TypeScript, HTML, CSS
+
+Database
+
+PostgreSQL, Supabase
+
+API Testing
+
+Bruno
+
+Architecture
+
+Layered REST API
+
+**Architecture**
+
+The backend follows a layered architecture:
+
+Controller → Service → Repository → JPA/Hibernate → PostgreSQL/Supabase
+
+The Angular frontend communicates with the Spring Boot backend through REST APIs.
+
+Core Domain
+
+Job
+ ├── Company
+ └── Application
+      ├── Status History
+      ├── Online Assessments
+      ├── Interviews
+      └── Resume
+
+**Project Structure**
+
+Job-Tracker/
+│
+├── backend/
+│   ├── src/main/java/com/jobtrack/
+│   │   ├── controller/
+│   │   ├── service/
+│   │   ├── repository/
+│   │   └── entity/
+│   ├── src/main/resources/
+│   └── pom.xml
+│
+├── frontend/
+│   ├── src/app/
+│   │   ├── services/
+│   │   ├── models/
+│   │   ├── app.component.html
+│   │   ├── app.component.ts
+│   │   └── app.component.css
+│   ├── package.json
+│   └── angular.json
+│
+├── bruno/
+├── .env.example
+├── .gitignore
+├── package-lock.json
+└── README.md
+
+**Getting Started**
+
+Prerequisites:
+
+Java 21
+
+Maven
+
+Node.js & npm
+
+PostgreSQL or a Supabase project
+
+1. Clone the Repository
+
+git clone https://github.com/sp-1410/Job-Tracker.git
+cd Job-Tracker
+
+2. Configure the Database
+
+Set the following environment variables:
+
+DB_URL=your_database_url
+DB_USERNAME=your_database_username
+DB_PASSWORD=your_database_password
+
+Note: Never commit real database credentials to the repository.
+
+3. Start the Backend
 
 cd backend
 mvn spring-boot:run
 
 Backend: http://localhost:8080
 
-Hibernate will create/update the development tables automatically.
+4. Start the Frontend
 
-## 3. Start frontend
+Open a new terminal:
 
 cd frontend
 npm install
-ng serve
+npm start
 
 Frontend: http://localhost:4200
 
-## Main APIs
+**API Modules**
 
-GET/POST /api/jobs
-GET/PUT/DELETE /api/jobs/{id}
+The backend exposes REST APIs for:
 
-GET/POST /api/companies
-GET/PUT/DELETE /api/companies/{id}
+/api/jobs
 
-GET/POST /api/applications
-GET/PUT/DELETE /api/applications/{id}
-PATCH /api/applications/{id}/status?value=INTERVIEW
-GET /api/applications/{id}/history
+/api/companies
 
-GET/POST /api/interviews
-GET /api/interviews/upcoming
+/api/applications
 
-GET/POST /api/resumes
+/api/interviews
 
-GET /api/dashboard/summary
+/api/online-assessments
 
-## DBeaver
+/api/resumes
 
-Use DBeaver to connect to the same Supabase PostgreSQL database and inspect the tables/data.
+/api/dashboard
 
-## Bruno
+Application status history is available through the application API.
 
-Create requests against http://localhost:8080 using the endpoints above.
+**Current Development**
+
+JobTrack is an ongoing project. Current development focuses on improving dashboard functionality and deadline tracking, with planned extensions for notifications and external job-site integration.
+
+**Future Enhancements**
+
+Job-site/API integration for importing opportunities
+
+Automated deadline and interview notifications
+
+Advanced recruitment analytics
+
+Improved search and filtering
+
+Authentication and user-specific job tracking
+
